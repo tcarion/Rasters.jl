@@ -33,3 +33,4 @@ if !Sys.iswindows()
     @time @safetestset "grd" begin include("sources/grd.jl") end
 end
 @time @safetestset "plot recipes" begin include("plotrecipes.jl") end
+@time @safetestset "gribdatasets" begin include("sources/gribdatasets.jl") end

@@ -1,13 +1,17 @@
 # Source dispatch singletons
 abstract type Source end
 
-struct NCDsource <: Source end
+abstract type CDMsource <: Source end
+struct NCDsource <: CDMsource end
+struct GRIBsource <: CDMsource end
 struct GRDsource <: Source end
 struct GDALsource <: Source end
 struct SMAPsource <: Source end
 
 # Deprecations
+const CDMfile = CDMsource
 const NCDfile = NCDsource
+const GRIBfile = GRIBsource
 const GRDfile = GRDsource
 const GDALfile = GDALsource
 const SMAPfile = SMAPsource
@@ -35,6 +39,7 @@ const EXT2SOURCE = Dict(
     ".grd" => GRDsource, 
     ".gri" => GRDsource, 
     ".nc" => NCDsource, 
+    ".grib" => GRIBfile, 
     ".h5" => SMAPsource
 )
 

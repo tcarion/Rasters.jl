@@ -13,7 +13,9 @@ using Dates
 import DimensionalData
 
 import Adapt,
+       GRIBDatasets,
        ColorTypes,
+       CommonDataModel,
        ConstructionBase,
        DiskArrays,
        Extents,
@@ -50,6 +52,8 @@ using Base: tail, @propagate_inbounds
 
 using Setfield: @set, @set!
 using ColorTypes: RGB
+
+using CommonDataModel: AbstractDataset, AbstractVariable, CFVariable
 
 export AbstractRaster, Raster
 export AbstractRasterStack, RasterStack
