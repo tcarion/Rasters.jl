@@ -170,7 +170,7 @@ function DD.dims(var::AbstractVariable, crs=nothing, mappedcrs=nothing)
     end |> Tuple
 end
 
-_attrib(ds::Union{AbstractDataset, AbstractVariable}) = Dict(k => CDM.attrib(ds, k) for k in CDM.attribnames(ds))
+_attrib(ds::Union{AbstractDataset, AbstractVariable}) = CDM.attribs(ds)
 DD.metadata(ds::AbstractDataset) = RA._metadatadict(CDMfile, _attrib(ds))
 DD.metadata(var::CFVariable) = RA._metadatadict(CDMfile, _attrib(var))
 DD.metadata(var::AbstractVariable) = RA._metadatadict(CDMfile, _attrib(var))
@@ -191,7 +191,7 @@ end
 
 DD.layermetadata(ds::AbstractDataset) = _layermetadata(ds, Tuple(RA.layerkeys(ds)))
 function _layermetadata(ds, keys)
-    dimtypes = map(k -> DD.metadata(NCD.variable(ds, string(k))), keys)
+    dimtypes = map(k -> DD.metadata(ds[string(k)]), keys)
     NamedTuple{map(Symbol, keys)}(dimtypes)
 end
 
