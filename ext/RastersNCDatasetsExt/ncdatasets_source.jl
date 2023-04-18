@@ -239,7 +239,10 @@ function RA.OpenStack(fs::RA.FileStack{GRIBfile,K}) where K
 end
 Base.close(os::RA.OpenStack{NCDfile}) = NCD.close(dataset(os))
 
-function RA._open(f, ::Type{NCDsource}, filename::AbstractString; write=false, kw...)
+# In GRIBDatasets, the file is open for reading the values and closed afterwards. 
+Base.close(os::RA.OpenStack{GRIBsource}) = nothing
+
+function _open(f, ::Type{NCDsource}, filename::AbstractString; write=false, kw...)
     isfile(filename) || RA._isurl(filename) || RA._filenotfound_error(filename)
     mode = write ? "a" : "r"
     NCD.Dataset(filename, mode) do ds
