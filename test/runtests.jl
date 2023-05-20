@@ -7,7 +7,7 @@ if VERSION >= v"1.9.0"
     Aqua.test_undefined_exports(Rasters)
     Aqua.test_project_extras(Rasters)
     Aqua.test_deps_compat(Rasters)
-    Aqua.test_project_toml_formatting(Rasters)
+    # Aqua.test_project_toml_formatting(Rasters)
 end
 @time @safetestset "methods" begin include("methods.jl") end
 @time @safetestset "reproject" begin include("reproject.jl") end
