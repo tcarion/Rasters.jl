@@ -13,7 +13,6 @@ using Dates
 import DimensionalData
 
 import Adapt,
-       GRIBDatasets,
        ColorTypes,
        CommonDataModel,
        ConstructionBase,

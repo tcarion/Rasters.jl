@@ -20,6 +20,7 @@ const SYMBOL2SOURCE = Dict(
     :gdal => GDALsource,
     :grd => GRDsource,
     :netcdf => NCDsource, 
+    :grib => GRIBsource, 
     :smap => SMAPsource,
 )
 
@@ -27,11 +28,13 @@ const SYMBOL2SOURCE = Dict(
 const SOURCE2EXT = Dict(
     GRDsource => (".grd", ".gri"), 
     NCDsource => (".nc",), 
+    GRIBsource => (".grib",), 
     SMAPsource => (".h5",),
 )
 const SOURCE2PACAKGENAME = Dict(
     GDALsource => "ArchGDAL",
     NCDsource => "NCDatasets",
+    GRIBsource => "GRIBDatasets",
     SMAPsource => "HDF5",
 )
 
@@ -39,7 +42,7 @@ const EXT2SOURCE = Dict(
     ".grd" => GRDsource, 
     ".gri" => GRDsource, 
     ".nc" => NCDsource, 
-    ".grib" => GRIBfile, 
+    ".grib" => GRIBsource, 
     ".h5" => SMAPsource
 )
 
