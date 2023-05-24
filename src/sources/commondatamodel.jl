@@ -31,6 +31,8 @@ const CDM_STANDARD_NAME_MAP = Dict(
     "time" => Ti,
 )
 
+_dataset(var::AbstractVariable) = CDM.dataset(var)
+
 haslayers(::Type{<:CDMsource}) = true
 defaultcrs(::Type{<:CDMsource}) = EPSG(4326)
 defaultmappedcrs(::Type{<:CDMsource}) = EPSG(4326)
@@ -56,18 +58,19 @@ _firstkey(ds::AbstractDataset, key::Nothing=nothing) = Symbol(first(layerkeys(ds
 _firstkey(ds::AbstractDataset, key) = Symbol(key)
 
 function FileArray(var::AbstractVariable, filename::AbstractString; kw...)
-    da = RasterDiskArray{CDMsource}(var)
+    source = _sourcetype(filename)
+    da = RasterDiskArray{source}(var)
     size_ = size(da)
     eachchunk = DA.eachchunk(da)
     haschunks = DA.haschunks(da)
     T = eltype(var)
     N = length(size_)
-    FileArray{NCDsource,T,N}(filename, size_; eachchunk, haschunks, kw...)
+    FileArray{source,T,N}(filename, size_; eachchunk, haschunks, kw...)
 end
 
-function Base.open(f::Function, A::FileArray{NCDsource}; write=A.write, kw...)
-    _open(NCDsource, filename(A); key=key(A), write, kw...) do var
-        f(RasterDiskArray{NCDsource}(var, DA.eachchunk(A), DA.haschunks(A)))
+function Base.open(f::Function, A::FileArray{source}; write=A.write, kw...) where source <: CDMsource
+    _open(source, filename(A); key=key(A), write, kw...) do var
+        f(RasterDiskArray{source}(var, DA.eachchunk(A), DA.haschunks(A)))
     end
 end
 

@@ -1,9 +1,9 @@
 module RastersGRIBDatasetsExt
 
 @static if isdefined(Base, :get_extension) # julia < 1.9
-    using Rasters, GRIBDatasets
+    using Rasters, GRIBDatasets, CommonDataModel
 else    
-    using ..Rasters, ..GRIBDatasets
+    using ..Rasters, ..GRIBDatasets, ..CommonDataModel
 end
 
 import DiskArrays,
@@ -19,6 +19,8 @@ using Dates,
 using Rasters.LookupArrays
 using Rasters.Dimensions
 using Rasters: GRIBsource
+
+using CommonDataModel: AbstractDataset
 
 const RA = Rasters
 const DD = DimensionalData

@@ -1,9 +1,9 @@
 module RastersNCDatasetsExt
 
 @static if isdefined(Base, :get_extension) # julia < 1.9
-    using Rasters, NCDatasets
+    using Rasters, NCDatasets, CommonDataModel
 else    
-    using ..Rasters, ..NCDatasets
+    using ..Rasters, ..NCDatasets, ..CommonDataModel
 end
 
 import DiskArrays,
@@ -18,7 +18,9 @@ using Dates,
 
 using Rasters.LookupArrays
 using Rasters.Dimensions
-using Rasters: NCDsource
+using Rasters: CDMsource, NCDsource
+
+using CommonDataModel: AbstractDataset
 
 const RA = Rasters
 const DD = DimensionalData
