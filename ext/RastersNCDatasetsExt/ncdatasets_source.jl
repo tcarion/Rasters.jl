@@ -75,7 +75,7 @@ function RA.OpenStack(fs::RA.FileStack{NCDsource,K}) where K
 end
 Base.close(os::RA.OpenStack{NCDsource}) = NCD.close(dataset(os))
 
-function _open(f, ::Type{NCDsource}, filename::AbstractString; write=false, kw...)
+function RA._open(f, ::Type{NCDsource}, filename::AbstractString; write=false, kw...)
     isfile(filename) || RA._isurl(filename) || RA._filenotfound_error(filename)
     mode = write ? "a" : "r"
     NCD.Dataset(filename, mode) do ds
