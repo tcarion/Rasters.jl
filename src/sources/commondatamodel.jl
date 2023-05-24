@@ -31,16 +31,16 @@ const CDM_STANDARD_NAME_MAP = Dict(
     "time" => Ti,
 )
 
-RA.haslayers(::Type{<:CDMsource}) = true
-RA.defaultcrs(::Type{<:CDMsource}) = EPSG(4326)
-RA.defaultmappedcrs(::Type{<:CDMsource}) = EPSG(4326)
+haslayers(::Type{<:CDMsource}) = true
+defaultcrs(::Type{<:CDMsource}) = EPSG(4326)
+defaultmappedcrs(::Type{<:CDMsource}) = EPSG(4326)
 
 # Raster ########################################################################
 
-function RA.Raster(ds::AbstractDataset, filename::AbstractString, key=nothing; kw...)
+function Raster(ds::AbstractDataset, filename::AbstractString, key=nothing; kw...)
     if isnothing(key)
         # Find the first valid variable
-        for key in RA.layerkeys(ds)
+        for key in layerkeys(ds)
             if ndims(ds[key]) > 0
                 @info "No `name` or `key` keyword provided, using first valid layer with name `:$key`"
                 return Raster(ds[key], filename, key; source=CDMsource, kw...)
@@ -52,26 +52,26 @@ function RA.Raster(ds::AbstractDataset, filename::AbstractString, key=nothing; k
     end
 end
 
-_firstkey(ds::AbstractDataset, key::Nothing=nothing) = Symbol(first(RA.layerkeys(ds)))
+_firstkey(ds::AbstractDataset, key::Nothing=nothing) = Symbol(first(layerkeys(ds)))
 _firstkey(ds::AbstractDataset, key) = Symbol(key)
 
-function RA.FileArray(var::AbstractVariable, filename::AbstractString; kw...)
-    da = RA.RasterDiskArray{CDMsource}(var)
+function FileArray(var::AbstractVariable, filename::AbstractString; kw...)
+    da = RasterDiskArray{CDMsource}(var)
     size_ = size(da)
     eachchunk = DA.eachchunk(da)
     haschunks = DA.haschunks(da)
     T = eltype(var)
     N = length(size_)
-    RA.FileArray{NCDsource,T,N}(filename, size_; eachchunk, haschunks, kw...)
+    FileArray{NCDsource,T,N}(filename, size_; eachchunk, haschunks, kw...)
 end
 
-function Base.open(f::Function, A::RA.FileArray{NCDsource}; write=A.write, kw...)
-    _open(NCDsource, filename(A); key=RA.key(A), write, kw...) do var
-        f(RA.RasterDiskArray{NCDsource}(var, DA.eachchunk(A), DA.haschunks(A)))
+function Base.open(f::Function, A::FileArray{NCDsource}; write=A.write, kw...)
+    _open(NCDsource, filename(A); key=key(A), write, kw...) do var
+        f(RasterDiskArray{NCDsource}(var, DA.eachchunk(A), DA.haschunks(A)))
     end
 end
 
-function RA.create(filename, ::Type{<:CDMsource}, T::Union{Type,Tuple}, dims::DimTuple;
+function create(filename, ::Type{<:CDMsource}, T::Union{Type,Tuple}, dims::DimTuple;
     name=:layer1, keys=(name,), layerdims=map(_->dims, keys), missingval=nothing,
     metadata=NoMetadata(), lazy=true, 
 )
@@ -101,12 +101,12 @@ function DD.dims(var::AbstractVariable, crs=nothing, mappedcrs=nothing)
 end
 
 _attrib(ds::Union{AbstractDataset, AbstractVariable}) = CDM.attribs(ds)
-DD.metadata(ds::AbstractDataset) = RA._metadatadict(CDMsource, _attrib(ds))
-DD.metadata(var::CFVariable) = RA._metadatadict(CDMsource, _attrib(var))
-DD.metadata(var::AbstractVariable) = RA._metadatadict(CDMsource, _attrib(var))
+DD.metadata(ds::AbstractDataset) = _metadatadict(CDMsource, _attrib(ds))
+DD.metadata(var::CFVariable) = _metadatadict(CDMsource, _attrib(var))
+DD.metadata(var::AbstractVariable) = _metadatadict(CDMsource, _attrib(var))
 
 function DD.layerdims(ds::AbstractDataset)
-    keys = Tuple(RA.layerkeys(ds))
+    keys = Tuple(layerkeys(ds))
     dimtypes = map(keys) do key
         DD.layerdims(ds[string(key)])
     end
@@ -119,13 +119,13 @@ function DD.layerdims(var::AbstractVariable)
     end |> Tuple
 end
 
-DD.layermetadata(ds::AbstractDataset) = _layermetadata(ds, Tuple(RA.layerkeys(ds)))
+DD.layermetadata(ds::AbstractDataset) = _layermetadata(ds, Tuple(layerkeys(ds)))
 function _layermetadata(ds, keys)
     dimtypes = map(k -> DD.metadata(ds[string(k)]), keys)
     NamedTuple{map(Symbol, keys)}(dimtypes)
 end
 
-RA.missingval(var::CDM.CFVariable{T}) where T = missing isa T ? missing : nothing
+missingval(var::CDM.CFVariable{T}) where T = missing isa T ? missing : nothing
 
 function layerkeys(ds::AbstractDataset)
     dimkeys = _dimkeys(ds)
@@ -145,7 +145,7 @@ function layerkeys(ds::AbstractDataset)
     return setdiff(keys(ds), toremove)
 end
 
-function RA.FileStack(source::Type{<:CDMsource}, ds::AbstractDataset, filename::AbstractString; write, keys)
+function FileStack(source::Type{<:CDMsource}, ds::AbstractDataset, filename::AbstractString; write, keys)
     keys = map(Symbol, keys isa Nothing ? layerkeys(ds) : keys) |> Tuple
     type_size_ec_hc = map(keys) do key
         var = ds[string(key)]
@@ -155,22 +155,22 @@ function RA.FileStack(source::Type{<:CDMsource}, ds::AbstractDataset, filename::
     layersizes = map(x->x[2], type_size_ec_hc)
     eachchunk = map(x->x[3], type_size_ec_hc)
     haschunks = map(x->x[4], type_size_ec_hc)
-    return RA.FileStack{source,keys}(filename, layertypes, layersizes, eachchunk, haschunks, write)
+    return FileStack{source,keys}(filename, layertypes, layersizes, eachchunk, haschunks, write)
 end
 
-function RA._open(f, ::Type{<:CDMsource}, ds::AbstractDataset; key=nothing, kw...)
+function _open(f, ::Type{<:CDMsource}, ds::AbstractDataset; key=nothing, kw...)
     x = key isa Nothing ? ds : ds[_firstkey(ds, key)]
-    RA.cleanreturn(f(x))
+    cleanreturn(f(x))
 end
-RA._open(f, ::Type{<:CDMsource}, var::CDM.CFVariable; kw...) = cleanreturn(f(var))
+_open(f, ::Type{<:CDMsource}, var::CDM.CFVariable; kw...) = cleanreturn(f(var))
 
 # Utils ########################################################################
 
-RA.cleanreturn(A::CDM.CFVariable) = Array(A)
+cleanreturn(A::CDM.CFVariable) = Array(A)
 
 # Utils ########################################################################
 
-function _ncddim(ds, dimname::RA.Key, crs=nothing, mappedcrs=nothing)
+function _ncddim(ds, dimname::Key, crs=nothing, mappedcrs=nothing)
     if haskey(ds, dimname)
         var = ds[dimname]
         D = _ncddimtype(_attrib(var), dimname)
@@ -223,7 +223,7 @@ end
 function _ncdlookup(ds::AbstractDataset, dimname, D::Type, crs, mappedcrs)
     dvar = ds[dimname]
     index = dvar[:]
-    metadata = RA._metadatadict(CDMsource, _attrib(dvar))
+    metadata = _metadatadict(CDMsource, _attrib(dvar))
     return _ncdlookup(ds, dimname, D, index, metadata, crs, mappedcrs)
 end
 # For unknown types we just make a Categorical lookup
