@@ -3,7 +3,7 @@ const GDS = GRIBDatasets
 RA.FileStack{GRIBsource}(ds::AbstractDataset, filename::AbstractString; write=false, keys) = RA.FileStack(GRIBsource, ds, filename; write, keys)
 
 function RA.OpenStack(fs::RA.FileStack{GRIBsource,K}) where K
-    RA.OpenStack{GRIBsource,K}(GDS.GRIBDataset(filename(fs)))
+    RA.OpenStack{GRIBsource,K}(GDS.GRIBDataset(RA.filename(fs)))
 end
 
 # In GRIBDatasets, the file is open for reading the values and closed afterwards. 
