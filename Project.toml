@@ -64,14 +64,6 @@ Requires = "0.5, 1"
 Setfield = "0.6, 0.7, 0.8, 1"
 julia = "1.8"
 
-[extensions]
-RastersArchGDALExt = "ArchGDAL"
-RastersCoordinateTransformationsExt = "CoordinateTransformations"
-RastersHDF5Ext = "HDF5"
-RastersMakieExt = "Makie"
-RastersNCDatasetsExt = "NCDatasets"
-RastersRasterDataSourcesExt = "RasterDataSources"
-
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 ArchGDAL = "c9ce4bd3-c3d5-55b8-8973-c0e20141b8c3"
