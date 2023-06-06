@@ -234,7 +234,7 @@ _checkbounds(A::AbstractRaster, I...) = checkbounds(Bool, A, I...)
 function _run(f, range::OrdinalRange, threaded::Bool, progress::Bool, desc::String) 
     p = progress ? _progress(length(range); desc) : nothing
     if threaded
-        Threads.@threads for i in range
+        Threads.@threads :static for i in range
             f(i)
             isnothing(p) || ProgressMeter.next!(p)
         end
@@ -284,7 +284,7 @@ function _extent(::Nothing, data::T; geometrycolumn=nothing)::XYExtent where T
                     acc
                 end
             end
-            return _float64_xy_extent(Extent(bounds))
+            return _float64_xy_extent(Extensts.Extent(bounds))
         end
     else
         ext = Extents.extent(data)

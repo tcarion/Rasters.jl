@@ -2,7 +2,8 @@ using Rasters, DimensionalData, Test, Statistics, Dates, CFTime, Plots
 using Rasters.LookupArrays, Rasters.Dimensions
 import ArchGDAL, NCDatasets
 using Rasters: FileArray, FileStack, NCDsource, crs
-include(joinpath(dirname(pathof(Rasters)), "../test/test_utils.jl"))
+testdir = realpath(joinpath(dirname(pathof(Rasters)), "../test"))
+include(joinpath(testdir, "test_utils.jl"))
 
 ncexamples = "https://www.unidata.ucar.edu/software/netcdf/examples/"
 ncsingle = maybedownload(joinpath(ncexamples, "tos_O1_2001-2002.nc"))
@@ -26,6 +27,20 @@ stackkeys = (
     :xl, :xlvi
 )
 
+@testset "grid mapping" begin
+    stack = RasterStack(joinpath(testdir, "data/grid_mapping_test.nc"))
+    @test metadata(stack.mask)["grid_mapping"]  == Dict{String, Any}(
+      "straight_vertical_longitude_from_pole" => 0.0,
+      "false_easting"                         => 0.0,
+      "standard_parallel"                     => -71.0,
+      "inverse_flattening"                    => 298.27940504282,
+      "latitude_of_projection_origin"         => -90.0,
+      "grid_mapping_name"                     => "polar_stereographic",
+      "semi_major_axis"                       => 6.378273e6,
+      "false_northing"                        => 0.0,
+    )
+end
+
 @testset "Raster" begin
     @time ncarray = Raster(ncsingle)
 
@@ -39,6 +54,12 @@ stackkeys = (
         @test parent(ncarray) isa Array
         @test parent(lazyarray) isa FileArray
         @test parent(eagerarray) isa Array
+    end
+
+    @testset "from url" begin
+        url = "http://apdrc.soest.hawaii.edu:80/dods/public_data/Reanalysis_Data/NCEP/NCEP2/daily/surface/mslp"
+        r = Raster(url; name=:mslp, source=:netcdf, lazy=true)
+        @test sum(r[Ti(1)]) == 1.0615972f9
     end
 
     @testset "open" begin
